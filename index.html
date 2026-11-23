@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дәмді Тағамдар Рецепті</title>
+
+    <style>
+        * {box-sizing: border-box;margin: 0;padding: 0;font-family: 'Segoe UI', Arial, sans-serif;}
+        body {background-color: #F3E0C9;color: #3b2a2d;padding-bottom: 50px;}
+        .hero-banner {background: #AEE1FC;color: #1a3d52;text-align: center;padding: 40px 20px;margin-bottom: 25px;border-bottom-left-radius: 25px;border-bottom-right-radius: 25px;position: relative;box-shadow: 0 4px 15px rgba(0,0,0,0.05);}
+            .hero-banner h1 {font-size: 2.2rem;margin-bottom: 8px;color: #1a3d52;}
+            .hero-banner p {color: #2c4d61;font-weight: 500;}
+        .top-auth-box {position: absolute;top: 15px;right: 20px;display: flex;gap: 10px;}
+        .auth-btn {background: rgba(255, 255, 255, 0.6);color: #244b63;border: 1px solid #7bc3f7;padding: 8px 16px;border-radius: 20px;font-size: 0.85rem;font-weight: bold;cursor: pointer;}
+            .auth-btn:hover {background: #fff;color: #1a3d52;}
+        .admin-btn {background: #F9BAC4;border: 1px solid #e3939f;color: #4a2026;}
+        .container {max-width: 100%;margin: 0 auto;padding: 0 20px;}
+        .panel-box {background: #fff;padding: 20px;border-radius: 20px;margin-bottom: 25px;border: 1px solid #F9BAC4;box-shadow: 0 4px 15px rgba(0,0,0,0.08);}
+        input, select, textarea {width: 100%;padding: 10px;margin: 8px 0;border: 1px solid #e0b0b8;border-radius: 10px;font-size: 0.9rem;background: #fff;color: #333;}
+        .action-btn {background-color: #F9BAC4;color: #4a2026;border: none;padding: 10px 20px;border-radius: 12px;font-weight: bold;cursor: pointer;}
+            .action-btn:hover {background-color: #f79eb0;}
+        .filter-row {display: flex;justify-content: center;gap: 10px;flex-wrap: wrap;margin-bottom: 15px;}
+        .filter-btn {padding: 10px 20px;border: 1px solid #e8c7cd;background-color: #ffffff;color: #5c3b40;border-radius: 25px;font-weight: 600;font-size: 0.9rem;cursor: pointer;transition: all 0.3s;}
+            .filter-btn.special-main {background-color: #F9BAC4;color: #2b181b;border-color: #e3939f;font-weight: bold;}
+            .filter-btn.active {background-color: #F9BAC4;color: #2b181b;border-color: #e096a1;box-shadow: 0 2px 8px rgba(249, 186, 196, 0.6);}
+            .filter-btn:hover:not(.active) {background-color: #faf1f2;}
+        .recipe-grid {flex: 1;display: grid;grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));gap: 12px;margin-top: 0;align-items: start;justify-content: start;}
+        .recipe-card {background: #fff;border-radius: 20px;padding: 15px;border: 1px solid #f2cfd5;text-align: center;cursor: pointer;position: relative;width: 100%;max-width: 100%;transition: transform 0.2s;box-shadow: 0 2px 10px rgba(0,0,0,0.03);}
+            .recipe-card:hover {transform: scale(1.02);box-shadow: 0 5px 15px rgba(249, 186, 196, 0.4);}
+        .recipe-img {width: 100%;height: 180px;object-fit: cover;border-radius: 12px;margin-bottom: 10px;}
+        .badge {position: absolute;top: 25px;right: 25px;padding: 5px 12px;border-radius: 12px;font-size: 0.75rem;font-weight: bold;}
+            .badge.free {background-color: #AEE1FC;color: #1a3d52;border: 1px solid #84ccf0;}
+            .badge.premium {background-color: #F9BAC4;color: #4a2026;border: 1px solid #e3939f;}
+        .modal-overlay {position: fixed;top: 0;left: 0;width: 100%;height: 100%;background: rgba(0, 0, 0, 0.4);display: none;justify-content: center;align-items: center;z-index: 1000;}
+        .modal-content {background: #fff;color: #3b2a2d;padding: 25px;border-radius: 20px;max-width: 500px;width: 90%;max-height: 90vh;overflow-y: auto;position: relative;border: 1px solid #F9BAC4;}
+        .close-btn {position: absolute;top: 15px;right: 20px;font-size: 1.5rem;cursor: pointer;color: #5c3b40;}
+        .content-layout {display: flex;align-items: flex-start;gap: 25px;}
+        .sidebar {width: 190px;flex-shrink: 0;position: sticky;top: 0;align-self: flex-start;}
+            .sidebar .filter-row {display: flex;flex-direction: column;align-items: stretch;gap: 10px;margin-bottom: 20px;}
+            .sidebar .filter-btn {width: 100%;text-align: left;}
+    </style>
+</head>
+
+<body>
+    <header class="hero-banner">
+        <div class="top-auth-box" id="authBox">
+            <button class="auth-btn" onclick="openModal('userAuthModal')">📱 Кіру / Тіркелу</button>
+            <button class="auth-btn admin-btn" onclick="openModal('adminAuthModal')">👑 Админ</button>
+        </div>
+
+        <h1>🥞 Дәмді Тағамдар Рецепті</h1>
+        <p>Өзіңізге ұнайтын санатты және бағаны таңдаңыз</p>
+    </header>
+
+    <div class="container">
+        <div id="adminPanel" class="panel-box" style="display: none;">
+            <h2 style="color: #4a2026; margin-bottom: 10px;">👑 Админ Панелі (Ұсынылған Рецепттер)</h2>
+            <div id="pendingList">Қазірше тексерілетін рецепттер жоқ.</div>
+        </div>
+
+        <div class="content-layout">
+            <div class="sidebar">
+                <div class="filter-row" id="categoryFilters">              
+                    <button class="filter-btn special-main active" onclick="setCategory('all', this)">Барлығы</button>
+                    <button class="filter-btn" onclick="setCategory('smoothie', this)">🍹 Смузи, сусындар</button>
+                    <button class="filter-btn" onclick="setCategory('dessert', this)">🧁 Десерттер</button>
+                    <button class="filter-btn" onclick="setCategory('fastfood', this)">🍔 Фастфуд</button>
+                    <button class="filter-btn" onclick="setCategory('breakfast', this)">🍳 Таңғы ас</button>
+                    <button class="filter-btn" onclick="setCategory('mains', this)">🍲 Ыстық тағамдар & Сорпалар</button>
+                </div>
+                <div class="filter-row" id="accessFilters">
+                    <button class="filter-btn special-main active" onclick="setAccess('all', this)">Кез келген баға</button>
+                    <button class="filter-btn" onclick="setAccess('free', this)">🆓 Тегін</button>
+                    <button class="filter-btn" onclick="setAccess('premium', this)">💎 Премиум</button>
+                </div>
+            </div>
+
+            <div class="recipe-grid" id="recipeContainer"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="recipeFormModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('recipeFormModal')">&times;</span>
+            <h2 id="formTitle" style="color: #4a2026; margin-bottom: 15px;">✍️ Өз рецептіңізді ұсыныңыз</h2>
+            <input type="text" id="newTitle" placeholder="Тағамның аты">
+            <select id="newCategory">
+                <option value="smoothie">🍹 Смузи, сусындар</option>
+                <option value="dessert">🧁 Десерттер</option>
+                <option value="fastfood">🍔 Фастфуд</option>
+                <option value="breakfast">🍳 Таңғы ас</option>
+                <option value="mains">🍲 Ыстық тағамдар</option>
+            </select>
+            <select id="newAccess">
+                <option value="free">Тегін рецепт</option>
+                <option value="premium">Премиум (Сатылатын)</option>
+            </select>
+            <input type="text" id="newPrice" placeholder="Бағасы (мысалы: Тегін немесе 2500 ₸)">
+            <input type="text" id="newImage" placeholder="Сурет сілтемесі (URL)">
+            <textarea id="newIngredients" rows="3" placeholder="Ингредиенттерді жазыңыз"></textarea>
+            <textarea id="newSteps" rows="3" placeholder="Дайындалу жолын жазыңыз"></textarea>
+            <button id="formBtn" class="action-btn" style="width: 100%; margin-top: 10px;" onclick="submitRecipe()">Админге Жіберу</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="userAuthModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('userAuthModal')">&times;</span>
+            <h3 style="margin-bottom: 15px; color: #4a2026;">📱 Нөмір арқылы кіру</h3>
+            <input type="text" id="userPhone" placeholder="+7 700 000 00 00">
+            <button class="action-btn" style="width: 100%; margin-bottom: 10px;" onclick="sendUserSMS()">Код алу</button>
+            <div id="userSmsBox" style="display: none;">
+                <input type="text" id="userSMS" placeholder="СМС кодты енгізіңіз (Код: 7878)">
+                <button class="action-btn" style="width: 100%;" onclick="loginUser()">Кіру</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="adminAuthModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('adminAuthModal')">&times;</span>
+            <h3 style="margin-bottom: 15px; color: #4a2026;">👑 Админ болып кіру</h3>
+            <input type="text" id="adminPhone" placeholder="Админ нөмірі (+7 ...)">
+            <button class="action-btn" style="width: 100%; margin-bottom: 10px;" onclick="sendAdminSMS()">Код алу</button>
+            <div id="adminSmsBox" style="display: none;">
+                <input type="text" id="adminSMS" placeholder="СМС кодты енгізіңіз (Код: 8897)">
+                <button class="action-btn" style="width: 100%;" onclick="loginAdmin()">Кіру</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="recipeModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('recipeModal')">&times;</span>
+            <div id="recipeModalBody"></div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal('paymentModal')">&times;</span>
+            <h2 style="color: #4a2026; margin-bottom: 15px;">💳 Сатып алу</h2>
+            <p style="margin-bottom: 15px; color: #666;">Төлем жасау үшін карта мәліметтерін енгізіңіз:</p>
+            <input type="text" id="cardNumber" placeholder="Карта нөмірі (Мысалы: 4400 1111 2222 3333)">
+            <input type="text" id="cardName" placeholder="Картадағы аты-жөніңіз">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="cardDate" placeholder="Ай/Жыл (12/25)">
+                <input type="text" id="cardCvv" placeholder="CVV (123)">
+            </div>
+            <button class="action-btn" style="width: 100%; margin-top: 15px;" onclick="payForRecipe()">Төлемді растау</button>
+        </div>
+    </div>
+
+    <script>
+        let recipes = [
+            {
+                id: 1,
+                title: "Құлпынайлы Смузи",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://images.unsplash.com/photo-1553530666-ba11a7da3888?w=600",
+                ingredients: "200г құлпынай, 100мл сүт, 1 шай қасық бал",
+                steps: "Барлық ингредиенттерді блендерге салып араластырыңыз."
+            },
+            {
+                id: 51,
+                title: "Желе",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "10 мин",
+                image: "https://i.pinimg.com/736x/23/ff/05/23ff05f6a94ce6f7087f0977da78d8c8.jpg",
+                ingredients: "400мл жеміс шырыны, 15г желатин, 30г қант",
+                steps: "Шырынды жылытып, желатин мен қантты ерітіңіз. Қалыптарға құйып, тоңазытқышта қатыртыңыз."
+            },
+            {
+                id: 2,
+                title: "Бананды Смузи",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/1200x/e7/b9/ba/e7b9bab4908904dd1be045dd1338d77c.jpg",
+                ingredients: "1 банан, 200мл сүт, 1 шай қасық бал",
+                steps: "Бананды турап, сүтпен және балмен блендерде араластырыңыз."
+            },
+           
+              
+            {
+                id: 55,
+                title: "Сүтті Пудинг",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "15 мин",
+                image: "https://i.pinimg.com/736x/c7/db/8b/c7db8b92e255e39acac336046e61b9d3.jpg",
+                ingredients: "500мл сүт, 40г жүгері крахмалы, 60г қант, ваниль",
+                steps: "Барлық ингредиенттерді араластырып, қоюланғанша баяу отта пісіріңіз. Ыдысқа құйып суытыңыз."
+            },    
+            {
+                id: 8,
+                title: "Шоколадты Банан Смузиі",
+                category: "smoothie",
+                access: "premium",
+                price: "1800 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/1200x/63/6c/07/636c07b90ea93363bfe8fb948a99e55e.jpg",
+                ingredients: "1 банан, 200мл сүт, 1 ас қасық какао",
+                steps: "Банан, сүт және какаоны блендерде біркелкі болғанша араластырыңыз."
+            },
+            {
+                id: 138,
+                title: "Тауық пен күріш",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "35 мин",
+                image: "https://i.pinimg.com/736x/c5/60/91/c56091f205556ba5f983bbee44754dd7.jpg",
+                ingredients: "250 г тауық еті, 200 г күріш, 1 сәбіз, 1 пияз, тұз",
+                steps: "Тауық пен көкөністерді қуырыңыз. Күріш пен су қосып, қақпағын жауып пісіріңіз."
+            },
+            {
+                id: 9,
+                title: "Киви Смузиі",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/41/08/6d/41086df5ef2f568c79fdbeb94e6e7012.jpg",
+                ingredients: "2 киви, 1 банан, 150мл алма шырыны",
+                steps: "Жемістерді аршып тураңыз. Шырын қосып, блендерде араластырыңыз."
+            },
+            {
+                id: 140,
+                title: "Тауық котлеті",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/1200x/1e/36/1a/1e361a852620ec18eff0f4ffbd76cf7b.jpg",
+                ingredients: "300 г тартылған тауық еті, 1 жұмыртқа, 1 пияз, 2 ас қасық ұн",
+                steps: "Ингредиенттерді араластырып, котлет жасаңыз. Табада екі жағын толық піскенше қуырыңыз."
+            },
+          
+            {
+                id: 11,
+                title: "Қарбыз Смузиі",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/de/75/30/de753013c8f017ebe765e0ee26e25663.jpg",
+                ingredients: "250г қарбыз, 5 жалбыз жапырағы, 1 шай қасық лимон шырыны",
+                steps: "Қарбыздың дәндерін алып, жалбыз және лимон шырынымен араластырыңыз."
+            },
+            {
+                id: 136,
+                title: "Лағман",
+                category: "mains",
+                access: "premium",
+                price: "2700 ₸",
+                time: "50 мин",
+                image: "https://i.pinimg.com/1200x/03/b9/4f/03b94fa258955d51ea22c557cc7d8264.jpg",
+                ingredients: "250 г кеспе, 250 г ет, 1 болгар бұрышы, 1 қызанақ, 1 пияз",
+                steps: "Ет пен көкөністерді қуырып, аздап су қосып бұқтырыңыз. Кеспені бөлек пісіріп, үстіне тұздық құйыңыз."
+            },
+           
+            {
+                id: 14,
+                title: "Авокадо Смузиі",
+                category: "smoothie",
+                access: "premium",
+                price: "1700 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/2e/cf/36/2ecf36c77db25c743b1047a726c9a1e0.jpg",
+                ingredients: "Жарты авокадо, 1 банан, 200мл сүт",
+                steps: "Авокадо мен бананды сүтке қосып, блендерде араластырыңыз."
+            },   
+            {
+                id: 98,
+                title: "Авокадо Тосты",
+                category: "breakfast",
+                access: "premium",
+                price: "1300 ₸",
+                time: "10 мин",
+                image: "https://i.pinimg.com/1200x/8d/ee/00/8dee008e0cb24f5fff5007af39223bdf.jpg",
+                ingredients: "2 тілім нан, жарты авокадо, лимон шырыны, тұз",
+                steps: "Нанды қызартып қуырыңыз. Авокадоны езіп, лимон шырыны мен тұз қосыңыз. Нанның үстіне жағыңыз."
+            },
+            {
+                id: 17,
+                title: "Алмұрт Смузиі",
+                category: "smoothie",
+                access: "premium",
+                price: "1100 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/d4/42/21/d4422141879593114cb6b0df2a4abd41.jpg",
+                ingredients: "1 алмұрт, 1 банан, 150мл сүт",
+                steps: "Алмұрт пен бананды турап, сүтпен бірге блендерде араластырыңыз."
+            },
+            {
+                id: 18,
+                title: "Кокос Смузиі",
+                category: "smoothie",
+                access: "premium",
+                price: "1600 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/98/17/4b/98174b9bb5b6dce2593d4e14f631e4a5.jpg",
+                ingredients: "200мл кокос сүті, 1 банан, 1 ас қасық кокос ұнтағы",
+                steps: "Барлық ингредиенттерді блендерде араластырыңыз."
+            },
+          
+           
+            {
+                id: 21,
+                title: "Лимонды Смузи",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/1200x/b6/7e/2e/b67e2ecb5357d91c0652ebeef089b907.jpg",
+                ingredients: "Жарты лимон шырыны, 1 банан, 150мл йогурт",
+                steps: "Барлық ингредиенттерді блендерде араластырыңыз."
+            },                                 
+            {
+                id: 26,
+                title: "Кофелі Смузи",
+                category: "smoothie",
+                access: "premium",
+                price: "1700 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/1200x/b2/52/f6/b252f606377687e91ee33cb65ba40525.jpg",
+                ingredients: "1 банан, 100мл салқын кофе, 100мл сүт",
+                steps: "Барлық ингредиенттерді блендерде араластырыңыз."
+            },       
+            {
+                id: 31,
+                title: "Шоколадты Торт",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "50 мин",
+                image: "https://images.unsplash.com/photo-1578985545062-69928b1d9587?w=600",
+                ingredients: "200г ұн, 150г қант, 2 жұмыртқа, 40г какао, 150мл сүт",
+                steps: "Жұмыртқа мен қантты араластырыңыз. Ұн, какао және сүт қосып, қамырды 180°C пеште 35 минут пісіріңіз."
+            },
+            {
+                id: 32,
+                title: "Чизкейк",
+                category: "dessert",
+                access: "premium",
+                price: "1800 ₸",
+                time: "60 мин",
+                image: "https://i.pinimg.com/736x/08/7f/67/087f67ddbb0c69742f22c4d5d262328d.jpg",
+                ingredients: "300г кілегейлі ірімшік, 150г печенье, 80г сары май, 100г қант",
+                steps: "Печеньені ұсақтап, еріген маймен араластырыңыз. Үстіне ірімшік пен қант қоспасын салып, пеште пісіріңіз."
+            },
+            {
+                id: 33,
+                title: "Брауни",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "35 мин",
+                image: "https://i.pinimg.com/736x/1a/3b/87/1a3b873a4c1ecee9b8f48ee9f2d2b251.jpg",
+                ingredients: "150г шоколад, 100г сары май, 100г қант, 2 жұмыртқа, 80г ұн",
+                steps: "Шоколад пен майды ерітіңіз. Жұмыртқа, қант және ұн қосып, 180°C пеште 20–25 минут пісіріңіз."
+            },
+            {
+                id: 34,
+                title: "Тирамису",
+                category: "dessert",
+                access: "premium",
+                price: "2200 ₸",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/0c/8b/ab/0c8bab87b3910706f75f77c311c6011b.jpg",
+                ingredients: "250г маскарпоне, 200г савоярди печеньесі, 150мл кофе, 2 жұмыртқа, какао",
+                steps: "Кремді дайындаңыз. Печеньені кофеге малып, креммен қабаттастырыңыз. Тоңазытқышқа 4 сағат қойыңыз."
+            },
+            {
+                id: 35,
+                title: "Медовик",
+                category: "dessert",
+                access: "premium",
+                price: "2000 ₸",
+                time: "70 мин",
+                image: "https://i.pinimg.com/736x/77/44/34/774434a5dfaf85cbba46c765f39efad3.jpg",
+                ingredients: "300г ұн, 100г бал, 100г қант, 2 жұмыртқа, 400г қаймақ",
+                steps: "Бал, қант және жұмыртқаны араластырып, ұн қосыңыз. Жұқа қабаттарды пісіріп, қаймақпен біріктіріңіз."
+            },
+            {
+                id: 66,
+                title: "Маргарита Пиццасы",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/0f/2d/6b/0f2d6b352a972b319d82d5557b88fdc0.jpg",
+                ingredients: "250г қамыр, 100г томат тұздығы, 150г моцарелла, райхан",
+                steps: "Қамырға томат тұздығын жағып, моцарелла салыңыз. 220°C пеште пісіріп, райханмен безендіріңіз."
+            },
+            {
+                id: 36,
+                title: "Наполеон Торты",
+                category: "dessert",
+                access: "premium",
+                price: "2500 ₸",
+                time: "90 мин",
+                image: "https://i.pinimg.com/736x/b1/ed/73/b1ed73c803d867e3133da7d3a494103a.jpg",
+                ingredients: "400г қатпарлы қамыр, 500мл сүт, 2 жұмыртқа, 100г қант, 40г ұн",
+                steps: "Қамырды жұқа қабаттарға бөліп пісіріңіз. Сүттен крем дайындап, қабаттардың арасына жағыңыз."
+            },
+           
+            {
+                id: 57,
+                title: "Шоколадты Рулет",
+                category: "dessert",
+                access: "premium",
+                price: "2000 ₸",
+                time: "40 мин",
+                image: "https://i.pinimg.com/736x/a9/df/15/a9df150eb01985ea375c76d23cdc506d.jpg",
+                ingredients: "4 жұмыртқа, 100г ұн, 100г қант, 2 ас қасық какао, 200г крем",
+                steps: "Жұмыртқа, қант, ұн және какаодан жұқа бисквит пісіріңіз. Крем жағып, рулет етіп ораңыз."
+            },     
+          
+            {
+                id: 39,
+                title: "Ванильді Кекс",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/af/c6/ff/afc6ffcc2439b593be7daba9db60ad7c.jpg",
+                ingredients: "200г ұн, 100г қант, 100г сары май, 2 жұмыртқа, ваниль",
+                steps: "Сары май мен қантты араластырыңыз. Жұмыртқа, ұн және ваниль қосып, 180°C пеште 25 минут пісіріңіз."
+            },
+          
+            {
+                id: 139,
+                title: "Пеште піскен тауық",
+                category: "mains",
+                access: "premium",
+                price: "2600 ₸",
+                time: "50 мин",
+                image: "https://i.pinimg.com/736x/95/15/92/951592611922e978f51dc2c33109f44d.jpg",
+                ingredients: "500 г тауық еті, 2 картоп, май, паприка, тұз",
+                steps: "Тауық пен картопты дәмдеуіштермен араластырыңыз. Пеште 180°C температурада толық піскенше пісіріңіз."
+            },
+            {
+                id: 41,
+                title: "Эклер",
+                category: "dessert",
+                access: "premium",
+                price: "1600 ₸",
+                time: "50 мин",
+                image: "https://i.pinimg.com/1200x/9e/67/0c/9e670c81c11cd38ef7f8757538b4dbeb.jpg",
+                ingredients: "150мл су, 75г сары май, 100г ұн, 3 жұмыртқа, 200г крем",
+                steps: "Су мен майды қайнатып, ұн қосыңыз. Жұмыртқаларды араластырып, қамырды пісіріңіз. Ішіне крем толтырыңыз."
+            },
+           
+           
+            {
+                id: 134,
+                title: "Үй тұшпарасы",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "45 мин",
+                image: "https://i.pinimg.com/1200x/8f/69/58/8f6958d2e94f9eb3b5aad18d1ccf132a.jpg",
+                ingredients: "300 г ұн, 250 г тартылған ет, 1 пияз, су, тұз",
+                steps: "Қамыр дайындаңыз. Ет пен пиязды ішіне салып, тұшпара түйіңіз. Қайнаған суда пісіріңіз."
+            },
+            {
+                id: 46,
+                title: "Вафли",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/89/02/ec/8902ec616982aa12e7c8cc0d2da19122.jpg",
+                ingredients: "200г ұн, 2 жұмыртқа, 250мл сүт, 50г қант, 50г сары май",
+                steps: "Барлық ингредиенттерді араластырып, вафли пісіргіште қызарғанша пісіріңіз."
+            },
+            {
+                id: 124,
+                title: "Асқабақ крем-сорпасы",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://avatars.mds.yandex.net/i?id=7739b24a19a61d98382d68304dc335f5-4935240-images-thumbs&n=13",
+                ingredients: "300 г асқабақ, 1 картоп, 100 мл кілегей, тұз",
+                steps: "Асқабақ пен картопты пісіріңіз. Блендермен езіп, кілегей қосып араластырыңыз."
+            },
+            {
+                id: 48,
+                title: "Шоколадты Печенье",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://i.pinimg.com/736x/76/2e/5f/762e5fbb594fd0dae0fbe6515d662545.jpg",
+                ingredients: "200г ұн, 100г сары май, 100г қант, 1 жұмыртқа, 80г шоколад",
+                steps: "Ингредиенттерді араластырып, печенье пішінін жасаңыз. 180°C пеште 12–15 минут пісіріңіз."
+            },
+           
+            {
+                id: 50,
+                title: "Лимонды Тарт",
+                category: "dessert",
+                access: "premium",
+                price: "1800 ₸",
+                time: "45 мин",
+                image: "https://i.pinimg.com/736x/69/b5/ff/69b5ff07c69e09dbd365e4c31ede133d.jpg",
+                ingredients: "200г ұн, 100г сары май, 2 лимон, 100г қант, 2 жұмыртқа",
+                steps: "Қамырды пісіріңіз. Лимон шырынын жұмыртқа және қантпен араластырып, қамырдың үстіне құйып қайта пісіріңіз."
+            },
+            {
+                id: 4,
+                title: "Көкжидек Смузиі",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/d8/0b/12/d80b12369b2cb2a4e1743d55b377b3e3.jpg",
+                ingredients: "100г көкжидек, 150мл йогурт, 1 банан",
+                steps: "Барлық ингредиенттерді блендерге салып, біркелкі болғанша араластырыңыз."
+            },      
+         
+            {
+                id: 53,
+                title: "Карамельді Крем",
+                category: "dessert",
+                access: "premium",
+                price: "1400 ₸",
+                time: "40 мин",
+                image: "https://i.pinimg.com/1200x/02/77/5f/02775f8d6c146926af5eee9ea343b8f4.jpg",
+                ingredients: "400мл сүт, 3 жұмыртқа, 100г қант, ваниль",
+                steps: "Жұмыртқа мен сүтті араластырыңыз. Қалыпқа карамель құйып, қоспаны қосыңыз. Су моншасында пеште пісіріңіз."
+            },
+            {
+                id: 54,
+                title: "Макарон Печеньесі",
+                category: "dessert",
+                access: "premium",
+                price: "2300 ₸",
+                time: "60 мин",
+                image: "https://i.pinimg.com/736x/cf/da/37/cfda37265d8fa23bd7a07ae88d1d920f.jpg",
+                ingredients: "100г бадам ұны, 100г қант ұнтағы, 75г жұмыртқа ағы, 100г крем",
+                steps: "Бадам ұны мен қант ұнтағын араластырыңыз. Жұмыртқа ағын қосып, кішкентай дөңгелектер жасап пісіріңіз. Креммен біріктіріңіз."
+            },
+              
+            {
+                id: 38,
+                title: "Шоколадты Маффин",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://i.pinimg.com/736x/a2/bf/05/a2bf0583a76f304d35d684b5b1ba5033.jpg",
+                ingredients: "200г ұн, 100г қант, 2 ас қасық какао, 1 жұмыртқа, 150мл сүт",
+                steps: "Барлық құрғақ ингредиенттерді араластырып, жұмыртқа мен сүт қосыңыз. Қалыптарға құйып, 180°C пеште пісіріңіз."
+            },     
+            {
+                id: 60,
+                title: "Құлпынайлы Панкейк",
+                category: "dessert",
+                access: "premium",
+                price: "1500 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/c9/35/78/c935782c7e1037513da1bd440432d0ab.jpg",
+                ingredients: "150г ұн, 1 жұмыртқа, 200мл сүт, 100г құлпынай, 40г қант",
+                steps: "Ұн, жұмыртқа, сүт және қантты араластырыңыз. Табада кішкентай панкейктер пісіріп, құлпынаймен безендіріңіз."
+            },
+            {
+                id: 61,
+                title: "Классикалық Бургер",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://i.pinimg.com/1200x/3c/1d/12/3c1d12d43ea6aeca59fd2321c4f15b8d.jpg",
+                ingredients: "1 тоқаш, 150г сиыр еті, 1 қызанақ, салат жапырағы, ірімшік, тұздық",
+                steps: "Еттен котлет жасап, табада толық пісіріңіз. Тоқашты қыздырып, ішіне котлет, ірімшік, қызанақ, салат және тұздық салыңыз."
+            },     
+            {
+                id: 63,
+                title: "Тауық Бургері",
+                category: "fastfood",
+                access: "premium",
+                price: "1800 ₸",
+                time: "25 мин",
+                image: "https://i.pinimg.com/736x/60/ec/d9/60ecd918b2875bb81610aafc81f396ac.jpg",
+                ingredients: "1 тоқаш, 150г тауық еті, салат жапырағы, қызанақ, майонез",
+                steps: "Тауық етін дәмдеуішпен пісіріңіз. Тоқашқа майонез жағып, тауық пен көкөністерді салыңыз."
+            },
+       
+            {
+                id: 65,
+                title: "Пепперони Пиццасы",
+                category: "fastfood",
+                access: "premium",
+                price: "2500 ₸",
+                time: "35 мин",
+                image: "https://i.pinimg.com/736x/52/30/c2/5230c280ef9e0ea33f8134b5fa55794e.jpg",
+                ingredients: "250г қамыр, 100г томат тұздығы, 150г моцарелла, 80г пепперони",
+                steps: "Қамырды жайып, томат тұздығын жағыңыз. Ірімшік пен пепперони салып, 220°C пеште 12–15 минут пісіріңіз."
+            },
+           
+           
+            {
+                id: 68,
+                title: "Картоп Фри",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://i.pinimg.com/736x/f0/ea/7e/f0ea7e600a67881c4ec38b3eb893c29b.jpg",
+                ingredients: "400г картоп, 1 ас қасық өсімдік майы, тұз, паприка",
+                steps: "Картопты ұзынша тураңыз. Май мен дәмдеуіш қосып араластырыңыз. 200°C пеште 25–30 минут пісіріңіз."
+            },
+         
+            {
+                id: 70,
+                title: "Тауық Наггетстері",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/40/ba/0b/40ba0bc52e4485587415c21aa8d3fcf6.jpg",
+                ingredients: "300г тауық еті, 1 жұмыртқа, 100г нан ұнтағы, 50г ұн, тұз",
+                steps: "Тауықты кішкентай бөліктерге кесіңіз. Ұнға, жұмыртқаға және нан ұнтағына кезекпен батырып, 200°C пеште толық піскенше пісіріңіз."
+            },
+            {
+                id: 71,
+                title: "Хот-дог",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "15 мин",
+                image: "https://i.pinimg.com/1200x/13/2e/75/132e7570778d45738ea32daf155060fd.jpg",
+                ingredients: "2 хот-дог тоқашы, 2 шұжық, кетчуп, қыша, қияр",
+                steps: "Шұжықтарды толық қыздырып пісіріңіз. Тоқаштың ішіне салып, кетчуп, қыша және қияр қосыңыз."
+            },
+            {
+                id: 72,
+                title: "Шаурма",
+                category: "fastfood",
+                access: "premium",
+                price: "1700 ₸",
+                time: "25 мин",
+                image: "https://i.pinimg.com/736x/a5/76/b8/a576b8b5c130714752f2afa790749163.jpg",
+                ingredients: "1 лаваш, 200г тауық еті, қырыққабат, қызанақ, қияр, сарымсақ тұздығы",
+                steps: "Тауықты толық пісіріп тураңыз. Лавашқа көкөністерді, тауықты және тұздықты салып, ораңыз."
+            },
+            {
+                id: 73,
+                title: "Донер",
+                category: "fastfood",
+                access: "premium",
+                price: "2000 ₸",
+                time: "30 мин",
+                image: "https://i.pinimg.com/1200x/d4/1c/a9/d41ca916e8db072de02788ae31307f1b.jpg",
+                ingredients: "200г тауық еті, 1 нан, 100г қырыққабат, қызанақ, қияр, тұздық",
+                steps: "Тауық етін дәмдеуішпен толық пісіріңіз. Нанға ет, көкөністер және тұздық салып ұсыныңыз."
+            },
+            {
+                id: 74,
+                title: "Кесадилья",
+                category: "fastfood",
+                access: "premium",
+                price: "1800 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/2a/27/48/2a274823aff6ad48aedca876d26e9bd7.jpg",
+                ingredients: "2 тортилья, 150г тауық еті, 100г ірімшік, тәтті бұрыш",
+                steps: "Тортильяға тауық, бұрыш және ірімшік салыңыз. Екінші тортильямен жауып, табада екі жағын қызартыңыз."
+            },
+            
+            {
+                id: 76,
+                title: "Тако",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/93/95/80/9395806f893321894d48648cf0ab184c.jpg",
+                ingredients: "3 тако қабығы, 150г тартылған ет, салат жапырағы, қызанақ, ірімшік",
+                steps: "Тартылған етті табада толық пісіріңіз. Тако қабықтарына ет, көкөністер мен ірімшік салыңыз."
+            },
+            {
+                id: 10,
+                title: "Апельсин Смузиі",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/5b/7f/9a/5b7f9a301ccf8681cb9500c7463f1960.jpg",
+                ingredients: "2 апельсин, 1 банан, 100мл йогурт",
+                steps: "Апельсинді тазалап, банан мен йогуртпен блендерде араластырыңыз."
+            },
+            {
+                id: 77,
+                title: "Клаб-сэндвич",
+                category: "fastfood",
+                access: "premium",
+                price: "1600 ₸",
+                time: "15 мин",
+                image: "https://i.pinimg.com/1200x/2e/09/6b/2e096bdf003139765f08bd91f230d300.jpg",
+                ingredients: "3 тілім нан, 100г тауық еті, 2 тілім ірімшік, қызанақ, салат, тұздық",
+                steps: "Нанды қуырыңыз. Арасына тауық, ірімшік, қызанақ пен салат салып, үшбұрыштап кесіңіз."
+            },
+            {
+                id: 78,
+                title: "Гриль Сэндвичі",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "10 мин",
+                image: "https://i.pinimg.com/1200x/f3/79/75/f37975e1297e655fac061937a6be3e05.jpg",
+                ingredients: "2 тілім нан, 2 тілім ірімшік, 10г сары май",
+                steps: "Нанның арасына ірімшік салыңыз. Сыртына май жағып, табада екі жағын қызартып пісіріңіз."
+            },
+           
+           
+         
+            {
+                id: 82,
+                title: "Тауықты Ролл",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "20 мин",
+                image: "https://avatars.mds.yandex.net/i?id=46c84d9c818249fa1d12d2acafe8b464a97672e0-13080626-images-thumbs&n=13",
+                ingredients: "1 лаваш, 150г тауық еті, салат жапырағы, қызанақ, йогурт тұздығы",
+                steps: "Тауықты толық пісіріп тураңыз. Лавашқа тауық, көкөністер және тұздық салып ораңыз."
+            },
+            {
+                id: 83,
+                title: "Картопты Драник",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://i.pinimg.com/1200x/51/db/1e/51db1e75f81d99bc2c794944c3f7f5a7.jpg",
+                ingredients: "4 картоп, 1 жұмыртқа, 2 ас қасық ұн, тұз, бұрыш",
+                steps: "Картопты үккіштен өткізіңіз. Жұмыртқа, ұн және дәмдеуіш қосып, табада екі жағын пісіріңіз."
+            },
+            {
+                id: 84,
+                title: "Тауық Қанаттары",
+                category: "fastfood",
+                access: "premium",
+                price: "2200 ₸",
+                time: "40 мин",
+                image: "https://i.ytimg.com/vi/kW9_JW33T6Q/maxresdefault.jpg",
+                ingredients: "500г тауық қанаты, 2 ас қасық май, паприка, сарымсақ, тұз",
+                steps: "Қанаттарға май мен дәмдеуіш жағыңыз. 200°C пеште толық піскенше, шамамен 35–40 минут пісіріңіз."
+            },
+            {
+                id: 85,
+                title: "Ірімшікті Пицца",
+                category: "fastfood",
+                access: "premium",
+                price: "2300 ₸",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/9d/b4/56/9db456a6428e6f4b411f81955f4b9092.jpg",
+                ingredients: "250г қамыр, 100г моцарелла, 50г чеддер, 50г пармезан, томат тұздығы",
+                steps: "Қамырға томат тұздығын жағып, ірімшіктерді салыңыз. 220°C пеште 12–15 минут пісіріңіз."
+            },
+            {
+                id: 86,
+                title: "Тауықты Кесадилья",
+                category: "fastfood",
+                access: "premium",
+                price: "1900 ₸",
+                time: "20 мин",
+                image: "https://avatars.mds.yandex.net/i?id=839c0fbf948ed28cc070061ac53d850c7db722ae-4567411-images-thumbs&n=13",
+                ingredients: "2 тортилья, 150г тауық еті, 100г ірімшік, 50г жүгері",
+                steps: "Тортильяға тауық, жүгері және ірімшік салыңыз. Бүктеп, табада ірімшік ерігенше қыздырыңыз."
+            },
+            {
+                id: 127,
+                title: "Көкөніс сорпасы",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://images.unsplash.com/photo-1476718406336-bb5a9690ee2a",
+                ingredients: "2 картоп, 1 сәбіз, 1 қызанақ, 100 г қырыққабат, тұз",
+                steps: "Көкөністерді турап, қайнаған суға салыңыз. Жұмсарғанша пісіріп, тұз қосыңыз."
+            },
+            {
+                id: 88,
+                title: "Көкөністі Пицца",
+                category: "fastfood",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/d1/c2/a6/d1c2a6715938b4a6405aa55fa18d9cae.jpg",
+                ingredients: "250г қамыр, 100г томат тұздығы, 100г ірімшік, бұрыш, қызанақ, саңырауқұлақ",
+                steps: "Қамырға тұздық жағып, туралған көкөністер мен ірімшік салыңыз. 220°C пеште пісіріңіз."
+            },
+          
+            {
+                id: 91,
+                title: "Классикалық Омлет",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "10 мин",
+                image: "https://i.pinimg.com/736x/2a/32/fc/2a32fce74ca09999eb3271cae0f81bd2.jpg",
+                ingredients: "2 жұмыртқа, 50мл сүт, тұз, 10г сары май",
+                steps: "Жұмыртқа мен сүтті араластырыңыз. Табаны майлап, қоспаны құйып, баяу отта толық піскенше дайындаңыз."
+            },
+            {
+                id: 131,
+                title: "Қазақша ет",
+                category: "mains",
+                access: "premium",
+                price: "3500 ₸",
+                time: "90 мин",
+                image: "https://tse2.mm.bing.net/th/id/OIP.PEDKwUNX8EElmdL3NF5mPwHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+                ingredients: "500 г ет, 300 г қамыр, 2 пияз, тұз",
+                steps: "Етті жұмсарғанша қайнатыңыз. Қамырды жайып, сорпада пісіріңіз. Үстіне туралған пияз бен ет салыңыз."
+            },
+            {
+                id: 92,
+                title: "Қуырылған Жұмыртқа",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "7 мин",
+                image: "https://i.pinimg.com/736x/c9/6b/cd/c96bcd97651030d742bf14b65d20ce05.jpg",
+                ingredients: "2 жұмыртқа, 10г сары май, тұз",
+                steps: "Табаны қыздырып, май қосыңыз. Жұмыртқаны жарып салып, ақуызы толық піскенше қуырыңыз."
+            },
+            {
+                id: 132,
+                title: "Палау",
+                category: "mains",
+                access: "premium",
+                price: "2500 ₸",
+                time: "60 мин",
+                image: "https://topdestinacije.hr/wp-content/uploads/2024/08/plov-jelo.jpg",
+                ingredients: "300 г күріш, 300 г ет, 1 сәбіз, 1 пияз, май, тұз",
+                steps: "Ет пен көкөністерді қуырыңыз. Күріш пен су қосып, баяу отта дайын болғанша пісіріңіз."
+            },
+            {
+                id: 93,
+                title: "Сүтті Сұлы Ботқасы",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "10 мин",
+                image: "https://massaget.kz/userdata/news/news_38493/image_l.jpg",
+                ingredients: "100г сұлы үлпегі, 250мл сүт, 1 шай қасық бал, банан",
+                steps: "Сүтті жылытып, сұлы қосыңыз. 5–7 минут араластырып пісіріңіз. Үстіне банан мен бал қосыңыз."
+            },
+            {
+                id: 94,
+                title: "Құймақ",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "20 мин",
+                image: "https://i.pinimg.com/1200x/17/67/25/176725424639a5064186cea4e7bab3dc.jpg",
+                ingredients: "200г ұн, 2 жұмыртқа, 300мл сүт, 2 ас қасық қант",
+                steps: "Барлық ингредиенттерді араластырып, сұйық қамыр дайындаңыз. Майланған табада екі жағын пісіріңіз."
+            },
+            {
+                id: 95,
+                title: "Америкалық Панкейк",
+                category: "breakfast",
+                access: "premium",
+                price: "1200 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/35/08/17/35081753958a57a07d777be99844de3e.jpg",
+                ingredients: "200г ұн, 1 жұмыртқа, 200мл сүт, 2 ас қасық қант, 1 шай қасық қопсытқыш",
+                steps: "Қамыр ингредиенттерін араластырыңыз. Табада кішкентай панкейктерді екі жағынан қызарғанша пісіріңіз."
+            },
+            {
+                id: 96,
+                title: "Ірімшікті Сырники",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/cf/bf/b9/cfbfb9c5f60b2101335de144dea3d6e0.jpg",
+                ingredients: "300г сүзбе, 1 жұмыртқа, 3 ас қасық ұн, 2 ас қасық қант",
+                steps: "Сүзбені жұмыртқа, қант және ұнмен араластырыңыз. Домалақ пішін жасап, табада екі жағын пісіріңіз."
+            },
+            {
+                id: 97,
+                title: "Ірімшікті Запеканка",
+                category: "breakfast",
+                access: "premium",
+                price: "1500 ₸",
+                time: "40 мин",
+                image: "https://i.pinimg.com/736x/81/63/fa/8163faa3fc939e6543f660d8eec712b2.jpg",
+                ingredients: "400г сүзбе, 2 жұмыртқа, 70г қант, 50г ұн, 100г қаймақ",
+                steps: "Ингредиенттерді араластырып, қалыпқа салыңыз. 180°C пеште 30–35 минут пісіріңіз."
+            },
+            
+            {
+                id: 99,
+                title: "Жұмыртқалы Сэндвич",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "12 мин",
+                image: "https://i.pinimg.com/736x/39/84/a1/3984a1a511aad0c32ce3818552a7bc6f.jpg",
+                ingredients: "2 тілім нан, 2 жұмыртқа, 1 тілім ірімшік, салат жапырағы",
+                steps: "Жұмыртқаны толық пісіріңіз. Нан арасына жұмыртқа, ірімшік пен салат салып жинаңыз."
+            },
+            {
+                id: 100,
+                title: "Гранола мен Йогурт",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/1200x/8d/16/6e/8d166e25973026b75373fa073ac81f4f.jpg",
+                ingredients: "200г табиғи йогурт, 50г гранола, 100г құлпынай, 1 шай қасық бал",
+                steps: "Ыдысқа йогурт құйыңыз. Үстіне гранола, туралған құлпынай және бал қосыңыз."
+            },
+            {
+                id: 40,
+                title: "Донат",
+                category: "dessert",
+                access: "premium",
+                price: "1200 ₸",
+                time: "40 мин",
+                image: "https://i.pinimg.com/1200x/0d/eb/85/0deb856402f33b36d96148c087691849.jpg",
+                ingredients: "300г ұн, 150мл сүт, 1 жұмыртқа, 50г қант, 7г ашытқы",
+                steps: "Қамыр илеңіз, көтерілгенше күтіңіз. Донат пішінін жасап, майға пісіріп, қант ұнтағын себіңіз."
+            },
+            {
+                id: 102,
+                title: "Бельгиялық Вафли",
+                category: "breakfast",
+                access: "premium",
+                price: "1600 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/c2/f9/d0/c2f9d01b848e847bab4ea6ee5aa27a4d.jpg",
+                ingredients: "200г ұн, 2 жұмыртқа, 250мл сүт, 50г сары май, 40г қант",
+                steps: "Барлық ингредиенттерді араластырыңыз. Вафли пісіргішке құйып, қызарғанша пісіріңіз."
+            },
+            {
+                id: 103,
+                title: "Ірімшікті Круассан",
+                category: "breakfast",
+                access: "premium",
+                price: "1400 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/8d/40/39/8d40397b2d35cb74f42017e05e0c5abf.jpg",
+                ingredients: "2 круассан, 80г ірімшік, 2 тілім қызанақ",
+                steps: "Круассандарды ортасынан кесіңіз. Ішіне ірімшік пен қызанақ салып, пеште ірімшік ерігенше қыздырыңыз."
+            },
+            {
+                id: 104,
+                title: "Шоколадты Круассан",
+                category: "breakfast",
+                access: "premium",
+                price: "1500 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/d4/7c/5b/d47c5b8cfe9734dd35b783446759a6e4.jpg",
+                ingredients: "2 круассан, 50г шоколад, 1 шай қасық қант ұнтағы",
+                steps: "Круассан ішіне шоколад салыңыз. 180°C пеште 5–8 минут жылытып, қант ұнтағын себіңіз."
+            },
+           
+            {
+                id: 106,
+                title: "Қызанақты Омлет",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "12 мин",
+                image: "https://pogovorim.by/uploads/posts/2024-12/1733085826_omlet.jpg",
+                ingredients: "2 жұмыртқа, 1 қызанақ, 30мл сүт, тұз, көк шөп",
+                steps: "Қызанақты турап, табада аздап жұмсартыңыз. Жұмыртқа мен сүт қоспасын құйып, толық піскенше дайындаңыз."
+            },
+          
+            {
+                id: 108,
+                title: "Жемісті Сұлы Ботқасы",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "10 мин",
+                image: "https://massaget.kz/userdata/news/news_38493/image_l.jpg",
+                ingredients: "100г сұлы, 250мл сүт, жарты алма, жарты банан, даршын",
+                steps: "Сұлыны сүтте пісіріңіз. Үстіне туралған алма, банан және даршын қосыңыз."
+            },
+           
+            {
+                id: 110,
+                title: "Көкөністі Омлет",
+                category: "breakfast",
+                access: "premium",
+                price: "1200 ₸",
+                time: "15 мин",
+                image: "https://i.palatabledishes.com/images/041/image-122141-j.webp",
+                ingredients: "2 жұмыртқа, жарты тәтті бұрыш, 1 қызанақ, 30мл сүт, тұз",
+                steps: "Көкөністерді тураңыз. Жұмыртқа мен сүтті араластырып, көкөністерге құйыңыз. Толық піскенше дайындаңыз."
+            },
+            {
+                id: 111,
+                title: "Таңғы Буррито",
+                category: "breakfast",
+                access: "premium",
+                price: "1700 ₸",
+                time: "20 мин",
+                image: "https://avatars.mds.yandex.net/get-vertis-journal/4465444/08ae4c4e-9b12-4a1c-93b8-198f4064813b.jpeg/1600x1600",
+                ingredients: "1 тортилья, 2 жұмыртқа, 50г ірімшік, қызанақ, 50г үрме бұршақ",
+                steps: "Жұмыртқаны толық пісіріңіз. Тортильяға жұмыртқа, ірімшік, қызанақ және бұршақ салып ораңыз."
+            },
+            {
+                id: 112,
+                title: "Французша Тост",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "15 мин",
+                image: "https://images.gastronom.ru/UPMmXmWZFeqnqQ8aHTfh1Zn5v8saUDJVZoOrUOznKEc/pr:article-cover-image/g:ce/rs:auto:0:0:0/L2Ntcy9hbGwtaW1hZ2VzL2FmY2NlODMwLWZlYjEtNGI0My05MGQ1LTQzYmFiZjlmNWYzZC5qcGc.webp",
+                ingredients: "4 тілім нан, 2 жұмыртқа, 100мл сүт, 1 ас қасық қант, даршын",
+                steps: "Жұмыртқа, сүт және қантты араластырыңыз. Нанды қоспаға батырып, табада екі жағын пісіріңіз."
+            },
+            {
+                id: 113,
+                title: "Жидекті Чиа-Пудинг",
+                category: "breakfast",
+                access: "premium",
+                price: "1500 ₸",
+                time: "10 мин",
+                image: "https://i.pinimg.com/736x/53/6c/0d/536c0d3b9294864eb7b4a0328670e36e.jpg",
+                ingredients: "3 ас қасық чиа дәні, 200мл сүт, 100г жидек, 1 шай қасық бал",
+                steps: "Чиа дәнін сүтпен араластырыңыз. Тоңазытқышта кемінде 3 сағат ұстаңыз. Жидек пен бал қосыңыз."
+            },
+            {
+                id: 12,
+                title: "Ананас Смузиі",
+                category: "smoothie",
+                access: "premium",
+                price: "1300 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/1200x/77/b3/09/77b309bd0b7ce86e3d6d7a3677816d07.jpg",
+                ingredients: "150г ананас, 150мл кокос сүті, жарты банан",
+                steps: "Барлық ингредиенттерді блендерде араластырып, стақанға құйыңыз."
+            },      
+            {
+                id: 115,
+                title: "Жемісті Йогурт",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://www.ermolino-produkty.ru/picts/articles/1500%D1%851000_kak_sdelat_domashniy_yogurt.jpg",
+                ingredients: "200г табиғи йогурт, 1 банан, 1 алма, 30г гранола",
+                steps: "Жемістерді тураңыз. Йогуртқа қосып, үстіне гранола себіңіз."
+            },
+            {
+                id: 116,
+                title: "Ірімшікті Тост",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "8 мин",
+                image: "https://i.pinimg.com/736x/f6/15/9c/f6159cc52b6c2c279ffd6d41bcb7f1bf.jpg",
+                ingredients: "2 тілім нан, 2 тілім ірімшік, 10г сары май",
+                steps: "Нанның арасына ірімшік салыңыз. Табада екі жағын қызартып, ірімшік ерігенше қыздырыңыз."
+            },
+            {
+                id: 117,
+                title: "Алма Қосылған Панкейк",
+                category: "breakfast",
+                access: "premium",
+                price: "1300 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/736x/99/97/75/99977585408b18e8745c5d7e46f908b4.jpg",
+                ingredients: "150г ұн, 1 алма, 1 жұмыртқа, 150мл сүт, 30г қант",
+                steps: "Алманы үккіштен өткізіңіз. Қалған ингредиенттермен араластырып, панкейктерді табада пісіріңіз."
+            },
+            {
+                id: 118,
+                title: "Картопты Драник",
+                category: "breakfast",
+                access: "free",
+                price: "Тегін",
+                time: "20 мин",
+                image: "https://i.pinimg.com/1200x/f1/e5/61/f1e561fc9854bd2aa106dcbcde866991.jpg ",
+                ingredients: "3 картоп, 1 жұмыртқа, 2 ас қасық ұн, тұз, бұрыш",
+                steps: "Картопты үккіштен өткізіп, жұмыртқа мен ұн қосыңыз. Қоспаны табада екі жағынан толық пісіріңіз."
+            },
+            {
+                id: 119,
+                title: "Жұмыртқалы Авокадо Тосты",
+                category: "breakfast",
+                access: "premium",
+                price: "1800 ₸",
+                time: "12 мин",
+                image: "https://i.pinimg.com/736x/ba/28/3c/ba283c9a46f208743d3a9134d342d398.jpg",
+                ingredients: "2 тілім нан, жарты авокадо, 1 жұмыртқа, лимон шырыны, тұз",
+                steps: "Нанды қызартыңыз. Авокадоны езіп жағыңыз. Жұмыртқаны толық пісіріп, тосттың үстіне салыңыз."
+            },
+            {
+                id: 120,
+                title: "Таңғы Круассан Сэндвичі",
+                category: "breakfast",
+                access: "premium",
+                price: "1900 ₸",
+                time: "15 мин",
+                image: "https://tse4.mm.bing.net/th/id/OIP.8qgJk8-yEkQnrRqE7j_4xgHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+                ingredients: "1 круассан, 1 жұмыртқа, 1 тілім ірімшік, 2 тілім қызанақ, салат жапырағы",
+                steps: "Жұмыртқаны толық пісіріңіз. Круассанды ортасынан кесіп, жұмыртқа, ірімшік, қызанақ пен салатты салыңыз."
+            },
+            {
+                id: 121,
+                title: "Тауық сорпасы",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "40 мин",
+                image: "https://i.pinimg.com/1200x/57/7f/e4/577fe4596c55ff907f126c457ef472f6.jpg",
+                ingredients: "200 г тауық еті, 2 картоп, 1 сәбіз, 50 г кеспе, тұз",
+                steps: "Тауықты суға қайнатыңыз. Картоп, сәбіз және кеспе қосып, дайын болғанша пісіріңіз."
+            },
+            {
+                id: 122,
+                title: "Кеспе сорпа",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "35 мин",
+                image: "https://i.pinimg.com/736x/8e/4f/0d/8e4f0de22311cfc7986106ec85ead32e.jpg",
+                ingredients: "200 г ет, 100 г кеспе, 2 картоп, 1 сәбіз, тұз",
+                steps: "Етті қайнатыңыз. Көкөністер мен кеспе қосып, жұмсарғанша пісіріңіз."
+            },
+            {
+                id: 3,
+                title: "Манго Смузиі",
+                category: "smoothie",
+                access: "free",
+                price: "Тегін",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/5e/eb/05/5eeb057d30bd713e13c2a6792adfb05d.jpg",
+                ingredients: "1 манго, 150мл йогурт, 50мл сүт",
+                steps: "Мангоны аршып тураңыз. Йогурт пен сүт қосып, блендерде араластырыңыз."
+            },
+            {
+                id: 123,
+                title: "Борщ",
+                category: "mains",
+                access: "premium",
+                price: "1800 ₸",
+                time: "60 мин",
+                image: "https://i.pinimg.com/736x/54/d1/b2/54d1b2398d12599fc1bb947af42632ff.jpg",
+                ingredients: "200 г ет, 1 қызылша, 2 картоп, қырыққабат, сәбіз, қызанақ пастасы",
+                steps: "Етті қайнатыңыз. Туралған көкөністерді қосып, қызылша мен қызанақ пастасын салып, піскенше қайнатыңыз."
+            },
+           
+            {
+                id: 125,
+                title: "Жасымық сорпасы",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "35 мин",
+                image: "https://i.ytimg.com/vi/ZPnwegiN8PU/maxresdefault.jpg",
+                ingredients: "150 г жасымық, 1 сәбіз, 1 пияз, 1 картоп, тұз",
+                steps: "Жасымықты жуыңыз. Су мен көкөністерді қосып, барлығы жұмсарғанша пісіріңіз."
+            },
+         
+           
+            {
+                id: 128,
+                title: "Саңырауқұлақ сорпасы",
+                category: "mains",
+                access: "premium",
+                price: "1700 ₸",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/fc/3d/d8/fc3dd8e101ee74115f0377a58e88ff6b.jpg",
+                ingredients: "200 г саңырауқұлақ, 2 картоп, 1 пияз, 100 мл кілегей",
+                steps: "Пияз бен саңырауқұлақты қуырыңыз. Картоппен бірге суға қосып пісіріңіз. Соңында кілегей құйыңыз."
+            },
+            {
+                id: 129,
+                title: "Тефтели сорпасы",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "40 мин",
+                image: "https://i.pinimg.com/1200x/5f/7f/b4/5f7fb42b7fe8ca6e27c50094c47af1a8.jpg",
+                ingredients: "200 г тартылған ет, 2 картоп, 1 сәбіз, 1 пияз, тұз",
+                steps: "Тартылған еттен кішкентай домалақтар жасаңыз. Қайнаған суға көкөністермен бірге салып, піскенше қайнатыңыз."
+            },
+            {
+                id: 130,
+                title: "Балық сорпасы",
+                category: "mains",
+                access: "premium",
+                price: "2000 ₸",
+                time: "35 мин",
+                image: "https://tse4.mm.bing.net/th/id/OIP.X-if6c5N7mSzmxiPoQI6VQHaE8?r=0&rs=1&pid=ImgDetMain&o=7&rm=3",
+                ingredients: "250 г балық, 2 картоп, 1 сәбіз, 1 пияз, тұз",
+                steps: "Балықты суға пісіріңіз. Картоп, сәбіз және пияз қосып, көкөністер жұмсарғанша қайнатыңыз."
+            },
+           
+           
+            {
+                id: 133,
+                title: "Манты",
+                category: "mains",
+                access: "premium",
+                price: "2800 ₸",
+                time: "60 мин",
+                image: "https://i.pinimg.com/736x/47/0a/72/470a722799013dd9ecd12994ebfa511f.jpg",
+                ingredients: "300 г ұн, 250 г тартылған ет, 1 пияз, су, тұз",
+                steps: "Ұн мен судан қамыр илеңіз. Ет пен пиязды ішіне салып түйіңіз. Буға шамамен 40 минут пісіріңіз."
+            },
+           
+            {
+                id: 135,
+                title: "Қуырдақ",
+                category: "mains",
+                access: "premium",
+                price: "3000 ₸",
+                time: "50 мин",
+                image: "https://i.pinimg.com/736x/8f/38/1c/8f381c731d3040852de1329c1c0aa74e.jpg",
+                ingredients: "400 г ет, 3 картоп, 1 пияз, май, тұз",
+                steps: "Етті турап қуырыңыз. Пияз бен картоп қосып, аздап су құйыңыз. Қақпағын жауып, дайын болғанша бұқтырыңыз."
+            },
+            {
+                id: 20,
+                title: "Құлпынай-Банан Смузиі",
+                category: "smoothie",
+                access: "premium",
+                price: "1400 ₸",
+                time: "5 мин",
+                image: "https://i.pinimg.com/736x/13/c8/aa/13c8aa85a14aae03e5dc51852c1d490d.jpg",
+                ingredients: "100г құлпынай, 1 банан, 150мл сүт",
+                steps: "Құлпынай мен бананды сүтке қосып, блендерде араластырыңыз."
+            },
+           
+            {
+                id: 137,
+                title: "Ет қосылған макарон",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "25 мин",
+                image: "https://i.pinimg.com/736x/f0/a2/0d/f0a20d528b5a85578036ca47aa11c53b.jpg",
+                ingredients: "250 г макарон, 200 г тартылған ет, 1 пияз, тұз",
+                steps: "Макаронды пісіріңіз. Ет пен пиязды қуырып, макаронмен араластырыңыз."
+            },
+             
+            
+            {
+                id: 141,
+                title: "Ет котлеті",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/736x/4c/12/33/4c1233296c22f0d09850810fa3b9805b.jpg",
+                ingredients: "300 г тартылған ет, 1 пияз, 1 жұмыртқа, тұз, бұрыш",
+                steps: "Етті пияз және жұмыртқамен араластырыңыз. Котлет жасап, табада толық піскенше қуырыңыз."
+            },
+            {
+                id: 37,
+                title: "Алма Бәліші",
+                category: "dessert",
+                access: "free",
+                price: "Тегін",
+                time: "45 мин",
+                image: "https://i.pinimg.com/1200x/0b/a8/e0/0ba8e0123d71cdfefa14487237220c4d.jpg",
+                ingredients: "3 алма, 200г ұн, 100г қант, 2 жұмыртқа, 100г сары май",
+                steps: "Алманы тураңыз. Қамырды дайындап, алма қосыңыз. 180°C пеште 35 минут пісіріңіз."
+            },
+            {
+                id: 43,
+                title: "Панна-Котта",
+                category: "dessert",
+                access: "premium",
+                price: "1500 ₸",
+                time: "20 мин",
+                image: "https://i.pinimg.com/1200x/32/bd/3b/32bd3b9669f5769017727365b0f1b428.jpg",
+                ingredients: "300мл кілегей, 50г қант, 10г желатин, ваниль",
+                steps: "Кілегей мен қантты жылытыңыз. Желатин қосып, қалыптарға құйыңыз. Тоңазытқышта қатыртыңыз."
+            },
+            {
+                id: 142,
+                title: "Картоп езбесі мен ет",
+                category: "mains",
+                access: "premium",
+                price: "2200 ₸",
+                time: "35 мин",
+                image: "https://i.pinimg.com/1200x/f9/6e/72/f96e72333426744eaab9dd308968e617.jpg",
+                ingredients: "3 картоп, 250 г ет, 30 г сары май, 100 мл сүт, тұз",
+                steps: "Картопты қайнатып, сүт пен май қосып езіңіз. Етті бөлек пісіріп, езбемен бірге ұсыныңыз."
+            },
+            {
+                id: 143,
+                title: "Көкөністі рагу",
+                category: "mains",
+                access: "free",
+                price: "Тегін",
+                time: "30 мин",
+                image: "https://i.pinimg.com/1200x/57/19/f2/5719f251d3ce06c4b6e02a8ac4397e7d.jpg",
+                ingredients: "2 картоп, 1 кәді, 1 сәбіз, 1 қызанақ, 1 пияз",
+                steps: "Көкөністерді тураңыз. Табада аздап қуырып, су қосып, жұмсарғанша бұқтырыңыз."
+            },
+            {
+                id: 144,
+                title: "Етті гуляш",
+                category: "mains",
+                access: "premium",
+                price: "2400 ₸",
+                time: "50 мин",
+                image: "https://th.bing.com/th/id/R.075edb8d8b63f3863f639b5d2b2577b4?rik=VAyNf6PhdA21nQ&riu=http%3a%2f%2ftipichnyjkulinar.com%2ffiles%2fimages%2fgroups%2foriginal%2f1%2fguljash.jpg%3fv%3d1&ehk=HEkVPu%2f9OnxEFP7Kve4mRz23BuOpVdlP%2f5yFEAGUVuI%3d&risl=&pid=ImgRaw&r=0",
+                ingredients: "350 г сиыр еті, 1 пияз, 1 сәбіз, 1 ас қасық қызанақ пастасы",
+                steps: "Етті турап қуырыңыз. Пияз, сәбіз және қызанақ пастасын қосыңыз. Су құйып, ет жұмсарғанша бұқтырыңыз."
+            }
+           
+        ];
+
+        let pendingRecipes = [];
+        let userLoggedIn = false;
+        let adminLoggedIn = false;
+        let currentCategory = 'all';
+        let currentAccess = 'all';
+        let recipeIdToBuy = 0;
+
+        function openModal(id) {
+            document.getElementById(id).style.display = 'flex';
+        }
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function sendUserSMS() {
+            let phone = document.getElementById('userPhone').value;
+            if (phone === "") { alert("Телефон нөмірін жазыңыз!"); return; }
+            document.getElementById('userSmsBox').style.display = 'block';
+            alert("СМС код жіберілді! (Код: 7878)");
+        }
+        function loginUser() {
+            let sms = document.getElementById('userSMS').value;
+            if (sms === "7878") {
+                userLoggedIn = true;
+                adminLoggedIn = false;
+                alert("Қолданушы болып сәтті кірдіңіз!");
+                closeModal('userAuthModal');
+                updateUI();
+            } else {
+                alert("Қате СМС код! (Код: 7878)");
+            }
+        }
+
+        function sendAdminSMS() {
+            let phone = document.getElementById('adminPhone').value;
+            if (phone === "") { alert("Админ нөмірін жазыңыз!"); return; }
+            document.getElementById('adminSmsBox').style.display = 'block';
+            alert("Админге СМС код жіберілді! (Код: 8897)");
+        }
+        function loginAdmin() {
+            let sms = document.getElementById('adminSMS').value;
+            if (sms === "8897") {
+                adminLoggedIn = true;
+                userLoggedIn = false;
+                alert("Админ болып сәтті кірдіңіз!");
+                closeModal('adminAuthModal');
+                updateUI();
+            } else {
+                alert("Қате код! (Код: 8897)");
+            }
+        }
+
+        function logout() {
+            userLoggedIn = false;
+            adminLoggedIn = false;
+            updateUI();
+        }
+
+        function updateUI() {
+            let authBox = document.getElementById('authBox');
+            let adminPanel = document.getElementById('adminPanel');
+            let formTitle = document.getElementById('formTitle');
+            let formBtn = document.getElementById('formBtn');
+            if (userLoggedIn === true) {
+                authBox.innerHTML = `
+                        <button class="auth-btn" onclick="openModal('recipeFormModal')">✍️ Өз рецептіңізді ұсыну</button>
+                        <button class="auth-btn" onclick="logout()">🚪 Шығу</button>
+                    `;
+                adminPanel.style.display = 'none';
+                formTitle.innerText = "✍️ Өз рецептіңізді ұсыныңыз";
+                formBtn.innerText = "Админге Жіберу";
+            }
+            else if (adminLoggedIn === true) {
+                authBox.innerHTML = `
+                        <button class="auth-btn admin-btn" onclick="openModal('recipeFormModal')">➕ Рецепт қосу</button>
+                        <button class="auth-btn" onclick="logout()">🚪 Шығу</button>
+                    `;
+                adminPanel.style.display = 'block';
+                renderPendingList();
+                formTitle.innerText = "➕ Жаңа рецепт қосу";
+                formBtn.innerText = "Сайтқа тікелей қосу";
+            }
+            else {
+                authBox.innerHTML = `
+                        <button class="auth-btn" onclick="openModal('userAuthModal')">📱 Кіру / Тіркелу</button>
+                        <button class="auth-btn admin-btn" onclick="openModal('adminAuthModal')">👑 Админ</button>
+                    `;
+                adminPanel.style.display = 'none';}}
+
+        function submitRecipe() {
+            let title = document.getElementById('newTitle').value;
+            let category = document.getElementById('newCategory').value;
+            let access = document.getElementById('newAccess').value;
+            let price = document.getElementById('newPrice').value;
+            let image = document.getElementById('newImage').value;
+            let ingredients = document.getElementById('newIngredients').value;
+            let steps = document.getElementById('newSteps').value;
+            if (price === "") { price = "Тегін"; }
+            if (image === "") { image = "https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=500&q=80"; }
+
+            if (title === "" || ingredients === "") {
+                alert("Тағам аты мен ингредиенттерді толтырыңыз!");
+                return;}
+            let newObj = {
+                id: Date.now(),
+                title: title,
+                category: category,
+                access: access,
+                price: price,
+                time: "20 мин",
+                image: image,
+                ingredients: ingredients,
+                steps: steps};
+            if (adminLoggedIn === true) {
+                recipes.push(newObj);
+                renderRecipes();
+                alert("Жаңа рецепт сайтқа тікелей қосылды!");
+            } else {
+                pendingRecipes.push(newObj);
+                alert("Рецептіңіз Админге тексеруге жіберілді!");}
+            document.getElementById('newTitle').value = '';
+            document.getElementById('newIngredients').value = '';
+            document.getElementById('newSteps').value = '';
+            closeModal('recipeFormModal');}
+
+        function renderPendingList() {
+            let list = document.getElementById('pendingList');
+            if (pendingRecipes.length === 0) {
+                list.innerHTML = "<p>Қазірше тексерілетін рецепттер жоқ.</p>";
+                return;}
+            let htmlText = "";
+            for (let i = 0; i < pendingRecipes.length; i++) {
+                let item = pendingRecipes[i];
+                htmlText += `
+                        <div style="border-bottom: 1px solid #F9BAC4; padding: 10px 0;">
+                            <h4>🍲 ${item.title} (${item.price})</h4>
+                            <p style="margin: 5px 0;"><b>Ингредиенттер:</b> ${item.ingredients}</p>
+                            <button style="background: #AEE1FC; color: #1a3d52; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="approveRecipe(${i})">✅ Қосу</button>
+                            <button style="background: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;" onclick="rejectRecipe(${i})">❌ Өшіру</button>
+                        </div>
+                    `;}
+
+            list.innerHTML = htmlText;
+        }
+        function approveRecipe(index) {
+            let item = pendingRecipes[index];
+            recipes.push(item);
+            pendingRecipes.splice(index, 1);
+            renderPendingList();
+            renderRecipes();
+            alert("Рецепт сайтқа қосылды!");}
+        function rejectRecipe(index) {
+            pendingRecipes.splice(index, 1);
+            renderPendingList();}
+
+        function setCategory(cat, btn) {
+            currentCategory = cat;
+            let buttons = document.querySelectorAll('#categoryFilters .filter-btn');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+                buttons[i].classList.remove('special-main');}
+            btn.classList.add('active');
+            if (cat === 'all') { btn.classList.add('special-main'); }
+            renderRecipes();}
+        function setAccess(acc, btn) {
+            currentAccess = acc;
+            let buttons = document.querySelectorAll('#accessFilters .filter-btn');
+            for (let i = 0; i < buttons.length; i++) {
+                buttons[i].classList.remove('active');
+                buttons[i].classList.remove('special-main');}
+            btn.classList.add('active');
+            if (acc === 'all') { btn.classList.add('special-main'); }
+            renderRecipes();}
+
+        function renderRecipes() {
+            let container = document.getElementById('recipeContainer');
+            container.innerHTML = '';
+
+            let filteredArray = [];
+            for (let i = 0; i < recipes.length; i++) {
+                let item = recipes[i];
+                let matchCategory = (currentCategory === 'all' || item.category === currentCategory);
+                let matchAccess = (currentAccess === 'all' || item.access === currentAccess);
+                if (matchCategory && matchAccess) {
+                    filteredArray.push(item);}}
+            let htmlText = "";
+            for (let i = 0; i < filteredArray.length; i++) {
+                let item = filteredArray[i];
+                let badgeClass = (item.access === 'free') ? "free" : "premium";
+                let badgeText = (item.access === 'free') ? "🆓 Тегін" : "💎 Премиум";
+
+                htmlText += `
+                        <div class="recipe-card" onclick="openRecipeModal(${item.id})">
+                            <span class="badge ${badgeClass}">${badgeText}</span>
+                            <img src="${item.image}" class="recipe-img">
+                            <h3>${item.title}</h3>
+                            <p style="color: #614247; font-size: 0.85rem; margin-top: 5px; font-weight: 600;">⏱ ${item.time} | 💰 ${item.price}</p>
+                        </div>
+                    `;}
+            container.innerHTML = htmlText;}
+
+        function openRecipeModal(id) {
+            let selectedRecipe = null;
+            for (let i = 0; i < recipes.length; i++) {
+                if (recipes[i].id === id) { selectedRecipe = recipes[i]; break; }}
+            let modalBody = document.getElementById('recipeModalBody');
+
+            if (selectedRecipe.access === 'free') {
+                modalBody.innerHTML = `
+                        <h2 style="color: #4a2026;">${selectedRecipe.title}</h2>
+                        <p style="margin: 10px 0;"><b>⏱ Уақыты:</b> ${selectedRecipe.time} | <b>💰 Бағасы:</b> ${selectedRecipe.price}</p>
+                        <hr style="border-color: #F9BAC4;"><br>
+                        <h4>🥑 Ингредиенттер:</h4>
+                        <p>${selectedRecipe.ingredients}</p><br>
+                        <h4>👩‍🍳 Дайындалу жолы:</h4>
+                        <p>${selectedRecipe.steps}</p>
+                    `;
+                openModal('recipeModal');
+            } else {
+                if (!userLoggedIn && !adminLoggedIn) {
+                    alert("Премиум рецептті ашу үшін алдымен жүйеге кіріңіз немесе тіркеліңіз!");
+                    openModal('userAuthModal');
+                } else {
+                    modalBody.innerHTML = `
+                            <div style="text-align: center;">
+                                <h2 style="color: #4a2026;">🔒 Премиум Рецепт</h2>
+                                <p style="margin: 10px 0; color: #666;">Рецептті ашу үшін төлем жасаңыз.</p>
+                                <h3 style="color: #4a2026; margin: 15px 0;">${selectedRecipe.price}</h3>
+                                <button class="action-btn" onclick="openPaymentModal(${selectedRecipe.id})">💳 Сатып Алу</button>
+                            </div>
+                        `;
+                    openModal('recipeModal');}}}
+        function openPaymentModal(id) {
+            recipeIdToBuy = id;
+            closeModal('recipeModal');
+            openModal('paymentModal');}
+        function payForRecipe() {
+            let cardNum = document.getElementById('cardNumber').value;
+            let cardName = document.getElementById('cardName').value;
+
+            if (cardNum === "" || cardName === "") {
+                alert("Карта мәліметтерін толық толтырыңыз!");
+                return;}
+
+            alert("✅ Төлем сәтті өтті! Енді рецептті оқи аласыз.");
+
+            for (let i = 0; i < recipes.length; i++) {
+                if (recipes[i].id === recipeIdToBuy) {
+                    recipes[i].access = 'free';
+                    recipes[i].price = "Сатып алынған";
+                    break;}}
+            document.getElementById('cardNumber').value = '';
+            document.getElementById('cardName').value = '';
+            document.getElementById('cardDate').value = '';
+            document.getElementById('cardCvv').value = '';
+            closeModal('paymentModal');
+
+            renderRecipes();
+            openRecipeModal(recipeIdToBuy);}
+
+        renderRecipes();
+    </script>
+</body>
+</html>
